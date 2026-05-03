@@ -60,3 +60,6 @@ npm-debug.log*
 # Cache
 .cache
 .eslintcache
+
+# Expo
+.expo/
