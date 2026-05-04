@@ -7,11 +7,18 @@ import { Colors, Spacing, FontSize, Radius, Shadow } from '../../constants/theme
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { notificationService } from '../../services/notificationService';
+import { Modal, Pressable } from 'react-native';
 
 export default function AdminUserList() {
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [showNotifyModal, setShowNotifyModal] = useState(false);
+  const [notifyTitle, setNotifyTitle] = useState('PetGuardian Update');
+  const [notifyMessage, setNotifyMessage] = useState('');
+  const [sending, setSending] = useState(false);
   const router = useRouter();
 
   const loadUsers = async () => {
@@ -60,6 +67,27 @@ export default function AdminUserList() {
     }
   };
 
+  const handleSendNotification = async () => {
+    if (!notifyMessage.trim()) return;
+    try {
+      setSending(true);
+      await notificationService.sendNotification({
+        userId: selectedUser._id,
+        title: notifyTitle,
+        message: notifyMessage,
+        type: 'system',
+        priority: 'high'
+      });
+      Alert.alert('Success', `Notification sent to ${selectedUser.fullName}`);
+      setShowNotifyModal(false);
+      setNotifyMessage('');
+    } catch (error) {
+      Alert.alert('Error', 'Failed to send notification.');
+    } finally {
+      setSending(false);
+    }
+  };
+
   const filteredUsers = users.filter(u => 
     u.fullName.toLowerCase().includes(search.toLowerCase()) || 
     u.email.toLowerCase().includes(search.toLowerCase())
@@ -88,6 +116,12 @@ export default function AdminUserList() {
           </View>
         </View>
         <View style={styles.actions}>
+          <TouchableOpacity 
+            onPress={() => { setSelectedUser(item); setShowNotifyModal(true); }} 
+            style={styles.actionBtn}
+          >
+            <Ionicons name="notifications-outline" size={22} color={Colors.primary} />
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => handleToggleStatus(item._id)} style={styles.actionBtn}>
             <Ionicons name={item.isActive ? "close-circle-outline" : "checkmark-circle-outline"} size={22} color={item.isActive ? "#ef4444" : "#22c55e"} />
           </TouchableOpacity>
@@ -121,7 +155,6 @@ export default function AdminUserList() {
           onChangeText={setSearch}
         />
       </View>
-
       {loading ? (
         <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 40 }} />
       ) : (
@@ -135,6 +168,57 @@ export default function AdminUserList() {
           }
         />
       )}
+
+      <Modal
+        visible={showNotifyModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowNotifyModal(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setShowNotifyModal(false)}>
+          <View style={{ width: '100%' }} onStartShouldSetResponder={() => true}>
+            <Card style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Send Notification</Text>
+            <Text style={styles.modalSub}>To: {selectedUser?.fullName}</Text>
+            
+            <Text style={styles.inputLabel}>Title</Text>
+            <TextInput
+              style={styles.input}
+              value={notifyTitle}
+              onChangeText={setNotifyTitle}
+              placeholder="Notification Title"
+            />
+
+            <Text style={styles.inputLabel}>Message</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              value={notifyMessage}
+              onChangeText={setNotifyMessage}
+              placeholder="Type your message here..."
+              multiline
+              numberOfLines={4}
+            />
+
+            <View style={styles.modalFooter}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowNotifyModal(false)}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.sendBtn, !notifyMessage.trim() && { opacity: 0.5 }]} 
+                onPress={handleSendNotification}
+                disabled={!notifyMessage.trim() || sending}
+              >
+                {sending ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <Text style={styles.sendBtnText}>Send Now</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </Card>
+          </View>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -242,9 +326,75 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   emptyText: {
-    textAlign: 'center',
-    color: '#94a3b8',
-    marginTop: 40,
     fontWeight: '600',
-  }
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalContent: {
+    padding: 24,
+    borderRadius: 24,
+    ...Shadow.lg,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#1e293b',
+    marginBottom: 8,
+  },
+  modalSub: {
+    fontSize: 14,
+    color: '#64748b',
+    marginBottom: 24,
+  },
+  inputLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#475569',
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: '#f8fafc',
+    borderRadius: 12,
+    padding: 12,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    marginBottom: 16,
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  modalFooter: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  cancelBtn: {
+    flex: 1,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  cancelBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#64748b',
+  },
+  sendBtn: {
+    flex: 2,
+    backgroundColor: Colors.primary,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    ...Shadow.sm,
+  },
+  sendBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.white,
+  },
 });

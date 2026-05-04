@@ -42,19 +42,22 @@ const createAppointment = async (req, res, next) => {
   try {
     const appointment = await Appointment.create({ ...req.body, ownerId: req.user._id });
     
-    // Notify the Vet
-    await createNotification(
-      appointment.vetUserId,
-      'New Appointment Request',
-      `You have a new appointment request for ${req.body.petName || 'a pet'}.`,
-      'appointment',
-      'medium',
-      appointment._id
-    );
+    // Notify the Vet (if exists)
+    if (appointment.vetUserId) {
+      await createNotification(
+        appointment.vetUserId,
+        'New Appointment Request',
+        `You have a new appointment request for ${req.body.petName || 'a pet'}.`,
+        'appointment',
+        'medium',
+        appointment._id
+      );
+    }
 
     // Also notify all Admins
     try {
       const admins = await User.find({ role: 'admin' });
+      console.log(`Notifying ${admins.length} admins about new appointment`);
       for (const admin of admins) {
         await createNotification(
           admin._id,
