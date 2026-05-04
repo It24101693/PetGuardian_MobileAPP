@@ -11,6 +11,9 @@ import { StatusBar } from 'expo-status-bar';
 
 import * as ImagePicker from 'expo-image-picker';
 import { Modal, Pressable } from 'react-native';
+import { API_BASE_URL } from '../../services/api';
+
+const BASE_URL = API_BASE_URL || 'http://172.28.31.229:5001/api';
 
 export default function CommunityScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -23,6 +26,22 @@ export default function CommunityScreen() {
   const [activeFilter, setActiveFilter] = useState<'latest' | 'popular'>('latest');
   const { user } = useAuth();
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
+
+  const getImageUrl = (url: string | null | undefined) => {
+    if (!url) return null;
+    
+    // If it's already a full URL or local file, return as is
+    if (url.startsWith('http') || url.startsWith('file:')) return url;
+    
+    // Fix for absolute Windows paths sneaking into the DB
+    let cleanUrl = url;
+    if (url.includes('uploads')) {
+      cleanUrl = 'uploads' + url.split('uploads')[1];
+    }
+    
+    const SERVER_URL = BASE_URL.replace('/api', '');
+    return `${SERVER_URL}/${cleanUrl.replace(/\\/g, '/')}`;
+  };
 
   const loadPosts = async (filter = activeFilter) => {
     try {
@@ -65,7 +84,7 @@ export default function CommunityScreen() {
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -277,26 +296,40 @@ export default function CommunityScreen() {
 
   const renderPostItem = ({ item }: { item: Post }) => {
     const isLiked = user && item.likes?.includes(user.id);
+    const isAuthor = user && (
+      (typeof item.userId === 'string' && item.userId === user.id) ||
+      (typeof item.userId === 'object' && (item.userId as any)._id === user.id)
+    );
+
+    const postUserName = typeof item.userId === 'object' ? (item.userId as any).fullName : item.userName;
+    const postUserAvatar = typeof item.userId === 'object' ? (item.userId as any).profileImageUrl : item.userAvatar;
+
     return (
       <Card style={styles.postCard}>
         <View style={styles.postHeader}>
           <View style={styles.postAvatar}>
-            {item.userAvatar ? (
-              <Image source={{ uri: item.userAvatar }} style={styles.avatarImg} />
+            {postUserAvatar ? (
+              <Image 
+                source={{ 
+                  uri: getImageUrl(postUserAvatar) || '',
+                  headers: { 'Bypass-Tunnel-Reminder': 'true' }
+                }} 
+                style={styles.avatarImg} 
+              />
             ) : (
-              <Text style={styles.avatarText}>{item.userName?.charAt(0) || 'U'}</Text>
+              <Text style={styles.avatarText}>{postUserName?.charAt(0) || 'U'}</Text>
             )}
           </View>
           <View style={{ flex: 1 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={styles.postUserName}>{item.userName}</Text>
+              <Text style={styles.postUserName}>{postUserName}</Text>
               {item.feeling && (
                 <Text style={styles.postFeelingText}> is feeling {item.feeling}</Text>
               )}
             </View>
             <Text style={styles.postTime}>{new Date(item.createdAt).toLocaleDateString()}</Text>
           </View>
-          {(user?.id === item.userId || user?.role === 'admin') && (
+          {(isAuthor || user?.role === 'admin') && (
             <TouchableOpacity onPress={() => handlePostOptions(item)}>
               <Ionicons name="ellipsis-horizontal" size={20} color="#64748b" />
             </TouchableOpacity>
@@ -304,7 +337,15 @@ export default function CommunityScreen() {
         </View>
 
         <Text style={styles.postContent}>{item.content}</Text>
-        {item.imageUrl && <Image source={{ uri: item.imageUrl }} style={styles.postImg} />}
+        {item.imageUrl && (
+          <Image 
+            source={{ 
+              uri: getImageUrl(item.imageUrl) || '',
+              headers: { 'Bypass-Tunnel-Reminder': 'true' }
+            }} 
+            style={styles.postImg} 
+          />
+        )}
 
         <View style={styles.postFooter}>
           <TouchableOpacity style={styles.postAction} onPress={() => handleLike(item._id)}>
@@ -473,6 +514,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+  },
+  iconBtnActive: {
+    opacity: 1,
   },
   iconBtnText: {
     fontSize: 13,

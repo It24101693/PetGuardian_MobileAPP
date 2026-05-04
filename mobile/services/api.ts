@@ -1,15 +1,19 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_BASE_URL } from '@env';
+import { API_BASE_URL as ENV_API_URL, AI_SERVICE_URL, HF_TOKEN, PUBLIC_WEB_URL as ENV_WEB_URL } from '@env';
 
-// Fallback if .env not loaded (but it should be)
-const BASE_URL = API_BASE_URL || 'http://172.28.31.229:5001/api';
+// Exported constants from env
+export const API_BASE_URL = ENV_API_URL || 'http://172.28.31.229:5001/api';
+export const AI_BASE_URL = AI_SERVICE_URL || 'http://172.28.31.229:5000';
+export const HUGGINGFACE_TOKEN = HF_TOKEN || '';
+export const PUBLIC_WEB_URL = ENV_WEB_URL || 'https://petguardianmobileapp-production.up.railway.app';
 
 export const api = axios.create({
-  baseURL: BASE_URL,
-  timeout: 30000,
+  baseURL: API_BASE_URL,
+  timeout: 60000,
   headers: {
     'Content-Type': 'application/json',
+    'Bypass-Tunnel-Reminder': 'true'
   },
 });
 
@@ -57,6 +61,3 @@ export const setAuthToken = async (token: string) => {
 export const clearAuthToken = async () => {
   await AsyncStorage.removeItem('pg_token');
 };
-
-import { AI_SERVICE_URL } from '@env';
-export const AI_BASE_URL = AI_SERVICE_URL || 'http://172.28.31.229:5000';

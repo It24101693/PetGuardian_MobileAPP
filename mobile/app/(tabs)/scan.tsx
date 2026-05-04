@@ -11,6 +11,9 @@ import { Card } from '../../components/ui/Card';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { API_BASE_URL } from '../../services/api';
+
+const BASE_URL = API_BASE_URL || 'http://172.28.31.229:5001/api';
 
 export default function ScanScreen() {
   const router = useRouter();
@@ -19,6 +22,19 @@ export default function ScanScreen() {
   const [result, setResult] = useState<ScanResult | null>(null);
   const [pets, setPets] = useState<Pet[]>([]);
   const [selectedPetId, setSelectedPetId] = useState<string>('');
+
+  const getImageUrl = (url: string | null | undefined) => {
+    if (!url) return 'https://via.placeholder.com/100';
+    if (url.startsWith('http') || url.startsWith('file:')) return url;
+    
+    let cleanUrl = url;
+    if (url.includes('uploads')) {
+      cleanUrl = 'uploads' + url.split('uploads')[1];
+    }
+    
+    const SERVER_URL = BASE_URL.replace('/api', '');
+    return `${SERVER_URL}/${cleanUrl.replace(/\\/g, '/')}`;
+  };
 
   useEffect(() => {
     loadPets();
@@ -42,7 +58,7 @@ export default function ScanScreen() {
     }
 
     const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -114,9 +130,15 @@ export default function ScanScreen() {
           <TouchableOpacity 
             key={pet._id}
             onPress={() => setSelectedPetId(pet._id)}
-            style={[styles.petChip, selectedPetId === pet._id && styles.petChipActive]}
+            style={[styles.petChip, selectedPetId === pet._id ? styles.petChipActive : null]}
           >
-            <Image source={{ uri: pet.imageUrl || 'https://via.placeholder.com/100' }} style={styles.petThumb} />
+            <Image 
+              source={{ 
+                uri: getImageUrl(pet.imageUrl),
+                headers: { 'Bypass-Tunnel-Reminder': 'true' }
+              }} 
+              style={styles.petThumb} 
+            />
             <Text style={[styles.petName, selectedPetId === pet._id && styles.petNameActive]}>{pet.name}</Text>
           </TouchableOpacity>
         ))}
@@ -173,10 +195,10 @@ export default function ScanScreen() {
 
         {result && (
           <View style={styles.resultContainer}>
-            <Card style={[styles.resultCard, result.isEmergency && styles.emergencyCard]}>
+            <Card style={[styles.resultCard, result.isEmergency ? styles.emergencyCard : null]}>
               <View style={styles.resultHeader}>
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.resultTitle, result.isEmergency && { color: Colors.danger }]}>
+                  <Text style={[styles.resultTitle, result.isEmergency ? { color: Colors.danger } : null]}>
                     {result.isEmergency ? '⚠️ EMERGENCY DETECTED' : '✓ ANALYSIS COMPLETE'}
                   </Text>
                   <Text style={styles.diseaseName}>{result.diseaseName}</Text>

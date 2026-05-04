@@ -27,10 +27,10 @@ DEFAULT_INPUT_SHAPE = (224, 224)
 def get_disease_model_path():
     """Get the disease model path, preferring custom model if it exists"""
     if os.path.exists(CUSTOM_DISEASE_MODEL_PATH):
-        print(f"✓ Using custom disease model: {CUSTOM_DISEASE_MODEL_PATH}")
+        print(f"[OK] Using custom disease model: {CUSTOM_DISEASE_MODEL_PATH}")
         return CUSTOM_DISEASE_MODEL_PATH
     else:
-        print(f"⚠ Custom model not found, using default: {DEFAULT_DISEASE_MODEL_PATH}")
+        print(f"[WARN] Custom model not found, using default: {DEFAULT_DISEASE_MODEL_PATH}")
         return DEFAULT_DISEASE_MODEL_PATH
 
 # Confidence Thresholds

@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
 
 // Fallback for local development
-import { API_BASE_URL, AI_BASE_URL as AI_SERVER } from '../../services/api';
+import { API_BASE_URL, AI_BASE_URL as AI_SERVER, PUBLIC_WEB_URL } from '../../services/api';
 const BASE_URL = API_BASE_URL || 'http://172.28.31.229:5001/api';
 
 interface PetCardProps {
@@ -20,7 +20,7 @@ export function PetCard({ pet, onPress }: PetCardProps) {
   const [qrVisible, setQrVisible] = useState(false);
   const defaultImage = 'https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg';
 
-  const publicProfileUrl = `${BASE_URL}/pets/public/qr/${pet.qrCode}`;
+  const publicProfileUrl = `${PUBLIC_WEB_URL}/api/pets/public/qr/${pet.qrCode}`;
 
   const getImageUrl = (url: string | undefined) => {
     if (!url) return defaultImage;
@@ -40,7 +40,10 @@ export function PetCard({ pet, onPress }: PetCardProps) {
       <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
         <Card style={styles.card} padding={0}>
           <Image
-            source={{ uri: getImageUrl(pet.imageUrl) }}
+            source={{ 
+              uri: getImageUrl(pet.imageUrl),
+              headers: { 'Bypass-Tunnel-Reminder': 'true' }
+            }}
             style={styles.image}
             resizeMode="cover"
           />

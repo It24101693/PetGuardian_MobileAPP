@@ -33,4 +33,9 @@ export const notificationService = {
   async deleteNotification(id: string): Promise<void> {
     await api.delete(`/notifications/${id}`);
   },
+  
+  async sendNotification(payload: { userId: string; title: string; message: string; type: string; priority: string }): Promise<any> {
+    const { data } = await api.post('/notifications', payload);
+    return data.data;
+  }
 };

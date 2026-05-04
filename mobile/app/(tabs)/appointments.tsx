@@ -6,7 +6,7 @@ import { Card } from '../../components/ui/Card';
 import { Badge, statusToBadgeVariant } from '../../components/ui/Badge';
 import { Colors, Spacing, FontSize } from '../../constants/theme';
 import { Button } from '../../components/ui/Button';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 
 export default function AppointmentsScreen() {
   const router = useRouter();
@@ -25,9 +25,11 @@ export default function AppointmentsScreen() {
     }
   };
 
-  useEffect(() => {
-    loadAppointments();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadAppointments();
+    }, [])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -130,7 +132,7 @@ const styles = StyleSheet.create({
     fontSize: FontSize.sm,
   },
   petName: {
-    color: Colors.white,
+    color: Colors.textPrimary,
     fontSize: FontSize.lg,
     fontWeight: 'bold',
   },

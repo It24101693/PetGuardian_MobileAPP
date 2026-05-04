@@ -39,7 +39,11 @@ export const authService = {
 
   async getMe(): Promise<User> {
     const { data } = await api.get('/auth/me');
-    return data.user;
+    const u = data.user;
+    return {
+      ...u,
+      id: u._id || u.id
+    };
   },
 
   async logout(): Promise<void> {

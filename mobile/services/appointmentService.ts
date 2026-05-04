@@ -14,6 +14,8 @@ export interface Appointment {
 
 export interface CreateAppointmentPayload {
   petId: string;
+  petName?: string;
+  petSpecies?: string;
   vetId?: string;
   vetUserId?: string;
   appointmentDate: string;

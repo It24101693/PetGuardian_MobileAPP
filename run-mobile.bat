@@ -9,7 +9,7 @@ start "PetGuardian Node Backend" cmd /k "cd node-backend && npm run dev"
 timeout /t 2 /nobreak >nul
 
 echo Starting AI Service...
-start "PetGuardian AI Service" cmd /k "cd ai-service && .venv\Scripts\activate || venv\Scripts\activate && python app.py"
+start "PetGuardian AI Service" cmd /k "cd ai-service && .venv\Scripts\python app.py"
 timeout /t 2 /nobreak >nul
 
 echo Starting Mobile App...

@@ -14,6 +14,9 @@ import { StatusBar } from 'expo-status-bar';
 
 import { notificationService } from '../../services/notificationService';
 import { useFocusEffect } from 'expo-router';
+import { API_BASE_URL } from '../../services/api';
+
+const BASE_URL = API_BASE_URL || 'http://172.28.31.229:5001/api';
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -25,6 +28,19 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  const getImageUrl = (url: string | null | undefined) => {
+    if (!url) return null;
+    if (url.startsWith('http') || url.startsWith('file:')) return url;
+    
+    let cleanUrl = url;
+    if (url.includes('uploads')) {
+      cleanUrl = 'uploads' + url.split('uploads')[1];
+    }
+    
+    const SERVER_URL = BASE_URL.replace('/api', '');
+    return `${SERVER_URL}/${cleanUrl.replace(/\\/g, '/')}`;
+  };
+
   const loadData = async () => {
     try {
       const [fetchedPets, fetchedAppts, notificationData] = await Promise.all([
@@ -35,7 +51,7 @@ export default function HomeScreen() {
       setPets(fetchedPets);
       setUnreadNotifications(notificationData.unreadCount);
       // Only show upcoming appointments
-      setAppointments(fetchedAppts.filter(a => a.status === 'confirmed' || a.status === 'pending').slice(0, 3));
+      setAppointments(fetchedAppts.filter((a: Appointment) => a.status === 'confirmed' || a.status === 'pending').slice(0, 3));
     } catch (error) {
       console.error(error);
     } finally {
@@ -71,7 +87,13 @@ export default function HomeScreen() {
               onPress={() => router.push('/(tabs)/profile')}
             >
               {user?.profileImageUrl ? (
-                <Image source={{ uri: user.profileImageUrl }} style={styles.avatarImage} />
+                <Image 
+                  source={{ 
+                    uri: getImageUrl(user.profileImageUrl) || '',
+                    headers: { 'Bypass-Tunnel-Reminder': 'true' }
+                  }} 
+                  style={styles.avatarImage} 
+                />
               ) : (
                 <Text style={styles.avatarText}>{user?.fullName?.charAt(0).toUpperCase()}</Text>
               )}
@@ -88,7 +110,7 @@ export default function HomeScreen() {
           >
             <Ionicons name="notifications-outline" size={26} color={Colors.textPrimary} />
             {unreadNotifications > 0 && (
-              <View style={styles.notificationBadge}>
+              <View style={[styles.notificationBadge, { backgroundColor: Colors.danger }]}>
                 <Text style={styles.badgeText}>{unreadNotifications > 9 ? '9+' : unreadNotifications}</Text>
               </View>
             )}
@@ -295,7 +317,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: Colors.error,
+    backgroundColor: Colors.danger,
     minWidth: 18,
     height: 18,
     borderRadius: 9,

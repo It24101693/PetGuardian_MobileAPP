@@ -91,10 +91,28 @@ const createNotification = async (userId, title, message, type = 'system', prior
   }
 };
 
+// @desc  Admin create notification for user
+// @route POST /api/notifications
+const sendManualNotification = async (req, res, next) => {
+  try {
+    const { userId, title, message, type, priority } = req.body;
+    
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ success: false, message: 'Not authorized' });
+    }
+
+    const notification = await createNotification(userId, title, message, type, priority);
+    res.status(201).json({ success: true, data: notification });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getMyNotifications,
   markAsRead,
   markAllAsRead,
   deleteNotification,
-  createNotification
+  createNotification,
+  sendManualNotification
 };

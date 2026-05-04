@@ -20,9 +20,22 @@ export default function ClinicDetailScreen() {
   
   // Selection states
   const [selectedPet, setSelectedPet] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [booking, setBooking] = useState(false);
+
+  // Generate next 7 days for selection
+  const dates = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    return {
+      full: d.toISOString().split('T')[0],
+      dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+      dayNum: d.getDate(),
+      month: d.toLocaleDateString('en-US', { month: 'short' }),
+    };
+  });
 
   const loadData = async () => {
     try {
@@ -59,8 +72,15 @@ export default function ClinicDetailScreen() {
   };
 
   const handleBooking = async () => {
-    if (!selectedPet || !selectedDoctor || !selectedSlot) {
-      Alert.alert('Selection Required', 'Please select a pet, doctor, and time slot.');
+    const hasDoctors = (clinic as any).doctors?.length > 0;
+    
+    if (!selectedPet || (hasDoctors && !selectedDoctor) || !selectedSlot) {
+      const missing = [];
+      if (!selectedPet) missing.push('a pet');
+      if (hasDoctors && !selectedDoctor) missing.push('a doctor');
+      if (!selectedSlot) missing.push('a time slot');
+      
+      Alert.alert('Selection Required', `Please select ${missing.join(', ')}.`);
       return;
     }
 
@@ -70,11 +90,15 @@ export default function ClinicDetailScreen() {
       
       await appointmentService.createAppointment({
         petId: selectedPet,
+        petName: pet?.name,
+        petSpecies: pet?.species,
         vetId: clinic?._id,
-        vetUserId: clinic?.userId, // The user ID associated with the vet
-        appointmentDate: new Date().toISOString().split('T')[0], // Simplified for now
+        vetUserId: clinic?.userId, 
+        appointmentDate: selectedDate,
         appointmentTime: selectedSlot,
-        reason: `General checkup with Dr. ${selectedDoctor.name}`,
+        reason: selectedDoctor 
+          ? `Checkup with Dr. ${selectedDoctor.name}`
+          : 'General checkup with available staff',
         status: 'pending'
       });
 
@@ -130,6 +154,24 @@ export default function ClinicDetailScreen() {
             <TouchableOpacity onPress={openMaps} style={styles.mapLink}>
               <Text style={styles.mapLinkText}>Show on Map</Text>
             </TouchableOpacity>
+          </View>
+
+          {/* Date Selection */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Select Date</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateList}>
+              {dates.map(d => (
+                <TouchableOpacity 
+                  key={d.full} 
+                  style={[styles.dateItem, selectedDate === d.full && styles.selectedDate]}
+                  onPress={() => setSelectedDate(d.full)}
+                >
+                  <Text style={[styles.dateMonth, selectedDate === d.full && styles.selectedTextMuted]}>{d.month}</Text>
+                  <Text style={[styles.dateNum, selectedDate === d.full && styles.selectedText]}>{d.dayNum}</Text>
+                  <Text style={[styles.dateDay, selectedDate === d.full && styles.selectedTextMuted]}>{d.dayName}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
 
           {/* Pet Selection */}
@@ -284,6 +326,41 @@ const styles = StyleSheet.create({
     color: Colors.primaryLight,
     fontWeight: 'bold',
     fontSize: 13,
+  },
+  dateList: {
+    flexDirection: 'row',
+  },
+  dateItem: {
+    width: 70,
+    height: 90,
+    borderRadius: 18,
+    backgroundColor: Colors.surfaceAlt,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.divider,
+  },
+  selectedDate: {
+    backgroundColor: Colors.primaryLight,
+    borderColor: Colors.primaryLight,
+    ...Shadow.sm,
+  },
+  dateMonth: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.textMuted,
+    textTransform: 'uppercase',
+  },
+  dateNum: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.textPrimary,
+    marginVertical: 2,
+  },
+  dateDay: {
+    fontSize: 12,
+    color: Colors.textMuted,
   },
   section: {
     marginBottom: 32,

@@ -1,4 +1,5 @@
 const Appointment = require('../models/Appointment');
+const User = require('../models/User');
 const { createNotification } = require('./notificationController');
 
 // @desc  Get appointments for current user
@@ -50,6 +51,23 @@ const createAppointment = async (req, res, next) => {
       'medium',
       appointment._id
     );
+
+    // Also notify all Admins
+    try {
+      const admins = await User.find({ role: 'admin' });
+      for (const admin of admins) {
+        await createNotification(
+          admin._id,
+          'Admin Alert: New Booking',
+          `A new appointment has been requested for ${req.body.petName || 'a pet'} at ${appointment.appointmentTime}.`,
+          'alert',
+          'medium',
+          appointment._id
+        );
+      }
+    } catch (err) {
+      console.error('Failed to notify admins:', err);
+    }
 
     res.status(201).json({ success: true, data: appointment });
   } catch (error) {
