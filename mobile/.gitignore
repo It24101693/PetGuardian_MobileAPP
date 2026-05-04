@@ -1,0 +1,16 @@
+node_modules/
+.expo/
+dist/
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# Expo
+.expo/
+dist/
+
+# Environment
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
