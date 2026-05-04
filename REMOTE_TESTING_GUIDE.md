@@ -59,7 +59,7 @@ This gives you a public URL like: `https://random-name.trycloudflare.com`
 ```env
 API_BASE_URL=https://your-tunnel-url.trycloudflare.com/api
 AI_SERVICE_URL=https://dulanajaya-pet-guardian-ai.hf.space
-HF_TOKEN=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
+HF_TOKEN=your_huggingface_token_here
 PUBLIC_WEB_URL=https://your-tunnel-url.trycloudflare.com
 ```
 

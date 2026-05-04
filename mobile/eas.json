@@ -16,7 +16,7 @@
       "env": {
         "API_BASE_URL": "https://petguardianmobileapp-production.up.railway.app/api",
         "AI_SERVICE_URL": "https://dulanajaya-pet-guardian-ai.hf.space",
-        "HF_TOKEN": "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",
+        "HF_TOKEN": "your_huggingface_token_here",
         "PUBLIC_WEB_URL": "https://petguardianmobileapp-production.up.railway.app"
       }
     },
@@ -24,7 +24,7 @@
       "env": {
         "API_BASE_URL": "https://petguardianmobileapp-production.up.railway.app/api",
         "AI_SERVICE_URL": "https://dulanajaya-pet-guardian-ai.hf.space",
-        "HF_TOKEN": "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",
+        "HF_TOKEN": "your_huggingface_token_here",
         "PUBLIC_WEB_URL": "https://petguardianmobileapp-production.up.railway.app"
       }
     }
