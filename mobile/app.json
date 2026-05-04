@@ -32,6 +32,12 @@
     "plugins": [
       "expo-router"
     ],
-    "scheme": "petguardian"
+    "scheme": "petguardian",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "3d5fa937-587e-4c72-8112-520bbf1b6128"
+      }
+    }
   }
 }

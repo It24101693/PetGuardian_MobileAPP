@@ -18,7 +18,6 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'owner' | 'veterinarian'>('owner');
   const [loading, setLoading] = useState(false);
 
   // Validation Error States
@@ -71,15 +70,10 @@ export default function RegisterScreen() {
         email,
         phoneNumber: phone,
         password,
-        role,
+        role: 'owner',
       });
 
-      // Role-based redirection
-      if (user.role === 'veterinarian') {
-        router.replace('/(tabs)/vet-home');
-      } else {
-        router.replace('/(tabs)/home');
-      }
+      router.replace('/(tabs)/home');
     } catch (error: any) {
       Alert.alert('Registration Failed', error.message || 'Something went wrong');
     } finally {
@@ -111,23 +105,6 @@ export default function RegisterScreen() {
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.label}>I am a...</Text>
-            <View style={styles.roleSelector}>
-              <TouchableOpacity 
-                style={[styles.roleOption, role === 'owner' && styles.roleOptionActive]}
-                onPress={() => setRole('owner')}
-              >
-                <Ionicons name="paw" size={20} color={role === 'owner' ? Colors.white : Colors.primary} />
-                <Text style={[styles.roleText, role === 'owner' && styles.roleTextActive]}>Pet Owner</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.roleOption, role === 'veterinarian' && styles.roleOptionActive]}
-                onPress={() => setRole('veterinarian')}
-              >
-                <Ionicons name="medical" size={20} color={role === 'veterinarian' ? Colors.white : Colors.primary} />
-                <Text style={[styles.roleText, role === 'veterinarian' && styles.roleTextActive]}>Veterinarian</Text>
-              </TouchableOpacity>
-            </View>
 
             <Input
               label="Full Name *"
@@ -252,39 +229,6 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     ...Shadow.md,
     marginBottom: Spacing.xl,
-  },
-  label: {
-    fontSize: FontSize.sm,
-    fontWeight: FontWeight.semibold,
-    color: Colors.textSecondary,
-    marginBottom: Spacing.sm,
-  },
-  roleSelector: {
-    flexDirection: 'row',
-    backgroundColor: Colors.surfaceAlt,
-    borderRadius: Radius.md,
-    padding: 4,
-    marginBottom: Spacing.lg,
-  },
-  roleOption: {
-    flex: 1,
-    flexDirection: 'row',
-    paddingVertical: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: Radius.md,
-    gap: 8,
-  },
-  roleOptionActive: {
-    backgroundColor: Colors.primary,
-  },
-  roleText: {
-    color: Colors.textMuted,
-    fontWeight: '600',
-    fontSize: FontSize.md,
-  },
-  roleTextActive: {
-    color: Colors.white,
   },
   registerButton: {
     marginTop: Spacing.xl,

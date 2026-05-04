@@ -40,6 +40,14 @@ const getAppointmentById = async (req, res, next) => {
 // @route POST /api/appointments
 const createAppointment = async (req, res, next) => {
   try {
+    const appointmentDate = new Date(req.body.appointmentDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (appointmentDate < today) {
+      return res.status(400).json({ success: false, message: 'Appointment date must be in the future.' });
+    }
+
     const appointment = await Appointment.create({ ...req.body, ownerId: req.user._id });
     
     // Notify the Vet (if exists)
