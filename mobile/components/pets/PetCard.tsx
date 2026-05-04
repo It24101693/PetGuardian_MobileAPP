@@ -7,9 +7,7 @@ import { Colors, Radius, Spacing, FontSize, Shadow } from '../../constants/theme
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
 
-// Fallback for local development
-import { API_BASE_URL, AI_BASE_URL as AI_SERVER, PUBLIC_WEB_URL } from '../../services/api';
-const BASE_URL = API_BASE_URL || 'http://172.28.31.229:5001/api';
+import { API_BASE_URL, getImageUrl, PUBLIC_WEB_URL } from '../../services/api';
 
 interface PetCardProps {
   pet: Pet;
@@ -22,13 +20,7 @@ export function PetCard({ pet, onPress }: PetCardProps) {
 
   const publicProfileUrl = `${PUBLIC_WEB_URL}/api/pets/public/qr/${pet.qrCode}`;
 
-  const getImageUrl = (url: string | undefined) => {
-    if (!url) return defaultImage;
-    if (url.startsWith('http') || url.startsWith('file:')) return url;
-    // Relative path from local storage fallback
-    const SERVER_URL = BASE_URL.replace('/api', '');
-    return `${SERVER_URL}/${url}`;
-  };
+  // Using shared utility from api.ts
 
   const toggleQrModal = (e?: any) => {
     e?.stopPropagation();

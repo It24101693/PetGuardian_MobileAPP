@@ -11,9 +11,7 @@ import { StatusBar } from 'expo-status-bar';
 
 import * as ImagePicker from 'expo-image-picker';
 import { Modal, Pressable } from 'react-native';
-import { API_BASE_URL } from '../../services/api';
-
-const BASE_URL = API_BASE_URL || 'http://172.28.31.229:5001/api';
+import { API_BASE_URL, getImageUrl } from '../../services/api';
 
 export default function CommunityScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -27,21 +25,7 @@ export default function CommunityScreen() {
   const { user } = useAuth();
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
 
-  const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return null;
-    
-    // If it's already a full URL or local file, return as is
-    if (url.startsWith('http') || url.startsWith('file:')) return url;
-    
-    // Fix for absolute Windows paths sneaking into the DB
-    let cleanUrl = url;
-    if (url.includes('uploads')) {
-      cleanUrl = 'uploads' + url.split('uploads')[1];
-    }
-    
-    const SERVER_URL = BASE_URL.replace('/api', '');
-    return `${SERVER_URL}/${cleanUrl.replace(/\\/g, '/')}`;
-  };
+  // Using shared getImageUrl from api.ts
 
   const loadPosts = async (filter = activeFilter) => {
     try {

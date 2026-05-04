@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Badge, statusToBadgeVariant } from '../../../components/ui/Badge';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { getImageUrl } from '../../../services/api';
 
 export default function PetDetailScreen() {
   const { id } = useLocalSearchParams();
@@ -97,13 +98,7 @@ export default function PetDetailScreen() {
     return `${months} ${months === 1 ? 'month' : 'months'}`;
   };
 
-  const getImageUrl = (url: string | undefined) => {
-    if (!url) return defaultImage;
-    if (url.startsWith('http') || url.startsWith('file:')) return url;
-    // Relative path from local storage fallback
-    const SERVER_URL = 'http://172.28.31.229:5001';
-    return `${SERVER_URL}/${url}`;
-  };
+  // Using shared utility from api.ts
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>

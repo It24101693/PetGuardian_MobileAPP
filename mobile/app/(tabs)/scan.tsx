@@ -11,9 +11,7 @@ import { Card } from '../../components/ui/Card';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-import { API_BASE_URL } from '../../services/api';
-
-const BASE_URL = API_BASE_URL || 'http://172.28.31.229:5001/api';
+import { API_BASE_URL, getImageUrl } from '../../services/api';
 
 export default function ScanScreen() {
   const router = useRouter();
@@ -23,18 +21,7 @@ export default function ScanScreen() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [selectedPetId, setSelectedPetId] = useState<string>('');
 
-  const getImageUrl = (url: string | null | undefined) => {
-    if (!url) return 'https://via.placeholder.com/100';
-    if (url.startsWith('http') || url.startsWith('file:')) return url;
-    
-    let cleanUrl = url;
-    if (url.includes('uploads')) {
-      cleanUrl = 'uploads' + url.split('uploads')[1];
-    }
-    
-    const SERVER_URL = BASE_URL.replace('/api', '');
-    return `${SERVER_URL}/${cleanUrl.replace(/\\/g, '/')}`;
-  };
+  // Using shared getImageUrl from api.ts
 
   useEffect(() => {
     loadPets();

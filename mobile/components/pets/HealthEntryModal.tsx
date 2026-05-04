@@ -84,28 +84,57 @@ export function HealthEntryModal({ visible, onClose, type, passportId, initialDa
     setReaction('');
   };
 
+  const validateForm = () => {
+    if (type === 'vaccine') {
+      if (!vaccineName.trim()) throw new Error('Vaccine name is required');
+      if (!dateGiven.trim()) throw new Error('Date given is required');
+      
+      const dateGivenObj = new Date(dateGiven);
+      if (isNaN(dateGivenObj.getTime())) throw new Error('Invalid Date Given format (YYYY-MM-DD)');
+      if (dateGivenObj > new Date()) throw new Error('Date Given cannot be in the future');
+
+      if (nextDue.trim()) {
+        const nextDueObj = new Date(nextDue);
+        if (isNaN(nextDueObj.getTime())) throw new Error('Invalid Next Due Date format');
+        if (nextDueObj <= dateGivenObj) throw new Error('Next Due Date must be after Date Given');
+      }
+    } else if (type === 'record') {
+      if (!title.trim()) throw new Error('Record title is required');
+      if (!diagnosis.trim() && !treatment.trim()) throw new Error('Please provide either a Diagnosis or Treatment plan');
+    } else if (type === 'allergy') {
+      if (!allergyName.trim()) throw new Error('Allergy name is required');
+      if (!reaction.trim()) throw new Error('Please describe the typical reaction');
+    }
+  };
+
   const handleSave = async () => {
     try {
+      validateForm();
       setLoading(true);
+
       if (type === 'vaccine') {
-        if (!vaccineName || !dateGiven) throw new Error('Name and Date are required');
-        const payload = { vaccineName, dateGiven, nextDueDate: nextDue || undefined, veterinarianName: vetName, notes };
+        const payload = { 
+          vaccineName: vaccineName.trim(), 
+          dateGiven, 
+          nextDueDate: nextDue || undefined, 
+          veterinarianName: vetName.trim(), 
+          notes: notes.trim() 
+        };
         if (initialData?._id) {
           await healthService.updateVaccination(initialData._id, payload);
         } else {
           await healthService.addVaccination(passportId, payload);
         }
       } else if (type === 'record') {
-        if (!title) throw new Error('Title is required');
         const payload = { 
-          title, 
+          title: title.trim(), 
           type: recordType,
-          diagnosis, 
-          treatment, 
-          medications: meds, 
+          diagnosis: diagnosis.trim(), 
+          treatment: treatment.trim(), 
+          medications: meds.trim(), 
           recoveryStatus,
-          veterinarianName: vetName, 
-          notes, 
+          veterinarianName: vetName.trim(), 
+          notes: notes.trim(), 
           recordDate: initialData?.recordDate || new Date().toISOString() 
         };
         if (initialData?._id) {
@@ -114,14 +143,17 @@ export function HealthEntryModal({ visible, onClose, type, passportId, initialDa
           await healthService.addMedicalRecord(passportId, payload);
         }
       } else if (type === 'allergy') {
-        if (!allergyName) throw new Error('Allergy name is required');
-        await healthService.addAllergy(passportId, { name: allergyName, severity, reaction });
+        await healthService.addAllergy(passportId, { 
+          name: allergyName.trim(), 
+          severity, 
+          reaction: reaction.trim() 
+        });
       }
       
       onSuccess();
       onClose();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to save entry');
+      Alert.alert('Validation Error', error.message || 'Failed to save entry');
     } finally {
       setLoading(false);
     }

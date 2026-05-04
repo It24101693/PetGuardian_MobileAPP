@@ -8,15 +8,14 @@ import { appointmentService, Appointment } from '../../services/appointmentServi
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { PetCard } from '../../components/pets/PetCard';
+import { LooperAssistant } from '../../components/ui/LooperAssistant';
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 
 import { notificationService } from '../../services/notificationService';
 import { useFocusEffect } from 'expo-router';
-import { API_BASE_URL } from '../../services/api';
-
-const BASE_URL = API_BASE_URL || 'http://172.28.31.229:5001/api';
+import { API_BASE_URL, getImageUrl } from '../../services/api';
 
 export default function HomeScreen() {
   const { user } = useAuth();
@@ -74,6 +73,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar style="dark" />
+      <LooperAssistant />
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

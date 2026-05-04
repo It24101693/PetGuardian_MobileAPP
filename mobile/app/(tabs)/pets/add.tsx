@@ -55,21 +55,36 @@ export default function AddPetScreen() {
   };
 
   const handleSave = async () => {
-    if (!name || !species) {
-      Alert.alert('Error', 'Name and Species are required');
+    const trimmedName = name.trim();
+    const trimmedBirthday = birthday.trim();
+
+    if (!trimmedName) {
+      Alert.alert('Validation Error', 'Pet Name is required');
       return;
+    }
+
+    if (trimmedBirthday) {
+      const bdayDate = new Date(trimmedBirthday);
+      if (isNaN(bdayDate.getTime())) {
+        Alert.alert('Validation Error', 'Invalid Birthday format. Use YYYY-MM-DD');
+        return;
+      }
+      if (bdayDate > new Date()) {
+        Alert.alert('Validation Error', 'Birthday cannot be in the future');
+        return;
+      }
     }
 
     try {
       setLoading(true);
       await petService.createPet({
-        name,
+        name: trimmedName,
         species: species.toLowerCase(),
-        breed,
+        breed: breed.trim(),
         gender: gender.toLowerCase(),
         weight: weight ? parseFloat(weight) : undefined,
-        color,
-        dateOfBirth: birthday || undefined,
+        color: color.trim(),
+        dateOfBirth: trimmedBirthday || undefined,
         imageUrl: image || undefined,
       });
       router.back();

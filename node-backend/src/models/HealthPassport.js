@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const allergySchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
-  severity: { type: String, enum: ['mild', 'moderate', 'severe'], default: 'mild' },
+  severity: { type: String, enum: ['Mild', 'Moderate', 'Severe'], default: 'Mild' },
   reaction: { type: String },
   diagnosedDate: { type: Date },
 });
@@ -20,9 +20,7 @@ const healthPassportSchema = new mongoose.Schema(
     height: { type: Number },
     allergies: [allergySchema],
     chronicConditions: [{ type: String }],
-    currentMedications: [
-      { name: String, dosage: String, frequency: String, startDate: Date },
-    ],
+    currentMedications: [{ type: String }],
     dietaryRestrictions: { type: String },
     emergencyContact: {
       name: { type: String },
