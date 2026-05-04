@@ -80,9 +80,17 @@ const addMedicalRecord = async (req, res, next) => {
   try {
     const passport = await HealthPassport.findById(req.params.passportId);
     if (!passport) return res.status(404).json({ success: false, message: 'Passport not found.' });
+    
+    console.log('📝 Creating medical record with data:', JSON.stringify(req.body, null, 2));
+    
     const record = await MedicalRecord.create({ ...req.body, petId: passport.petId, passportId: passport._id });
     res.status(201).json({ success: true, data: record });
   } catch (error) {
+    console.error('❌ Medical record creation error:', error.message);
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ success: false, message: errors.join(', ') });
+    }
     next(error);
   }
 };
@@ -114,13 +122,38 @@ const deleteMedicalRecord = async (req, res, next) => {
 // @route POST /api/health/:passportId/allergies
 const addAllergy = async (req, res, next) => {
   try {
+    console.log('🔍 Adding allergy with data:', JSON.stringify(req.body, null, 2));
+    
     const passport = await HealthPassport.findByIdAndUpdate(
       req.params.passportId,
       { $push: { allergies: req.body } },
       { new: true, runValidators: true }
     );
     if (!passport) return res.status(404).json({ success: false, message: 'Passport not found.' });
+    
+    console.log('✅ Allergy added successfully');
     res.status(201).json({ success: true, data: passport });
+  } catch (error) {
+    console.error('❌ Allergy creation error:', error.message);
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ success: false, message: errors.join(', ') });
+    }
+    next(error);
+  }
+};
+
+// @desc  Delete allergy from passport
+// @route DELETE /api/health/:passportId/allergies/:allergyId
+const deleteAllergy = async (req, res, next) => {
+  try {
+    const passport = await HealthPassport.findByIdAndUpdate(
+      req.params.passportId,
+      { $pull: { allergies: { _id: req.params.allergyId } } },
+      { new: true }
+    );
+    if (!passport) return res.status(404).json({ success: false, message: 'Passport not found.' });
+    res.json({ success: true, data: passport });
   } catch (error) {
     next(error);
   }
@@ -130,5 +163,5 @@ module.exports = {
   getPassportByPetId, updatePassport,
   addVaccination, updateVaccination, deleteVaccination,
   addMedicalRecord, updateMedicalRecord, deleteMedicalRecord,
-  addAllergy,
+  addAllergy, deleteAllergy,
 };

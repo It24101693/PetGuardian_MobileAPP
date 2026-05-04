@@ -58,6 +58,23 @@ const getPetByQrCode = async (req, res, next) => {
 // @route POST /api/pets
 const createPet = async (req, res, next) => {
   try {
+    // Validate weight
+    if (req.body.weight !== undefined && req.body.weight !== null) {
+      const weight = parseFloat(req.body.weight);
+      if (isNaN(weight) || weight <= 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Weight must be a positive number greater than 0' 
+        });
+      }
+      if (weight > 500) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Weight value seems too high. Please check the value.' 
+        });
+      }
+    }
+
     const petData = {
       ...req.body,
       ownerId: req.user._id,
@@ -87,6 +104,23 @@ const createPet = async (req, res, next) => {
 // @route PUT /api/pets/:id
 const updatePet = async (req, res, next) => {
   try {
+    // Validate weight
+    if (req.body.weight !== undefined && req.body.weight !== null) {
+      const weight = parseFloat(req.body.weight);
+      if (isNaN(weight) || weight <= 0) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Weight must be a positive number greater than 0' 
+        });
+      }
+      if (weight > 500) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Weight value seems too high. Please check the value.' 
+        });
+      }
+    }
+
     const pet = await Pet.findById(req.params.id);
     if (!pet) return res.status(404).json({ success: false, message: 'Pet not found.' });
 

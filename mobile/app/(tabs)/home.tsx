@@ -8,7 +8,6 @@ import { appointmentService, Appointment } from '../../services/appointmentServi
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { PetCard } from '../../components/pets/PetCard';
-import { LooperAssistant } from '../../components/ui/LooperAssistant';
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
@@ -73,7 +72,6 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar style="dark" />
-      <LooperAssistant />
       <ScrollView 
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}

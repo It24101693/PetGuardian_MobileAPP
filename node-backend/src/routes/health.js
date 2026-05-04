@@ -4,7 +4,7 @@ const {
   getPassportByPetId, updatePassport,
   addVaccination, updateVaccination, deleteVaccination,
   addMedicalRecord, updateMedicalRecord, deleteMedicalRecord,
-  addAllergy,
+  addAllergy, deleteAllergy,
 } = require('../controllers/healthController');
 
 const router = express.Router();
@@ -23,5 +23,6 @@ router.put('/records/:id', updateMedicalRecord);
 router.delete('/records/:id', deleteMedicalRecord);
 
 router.post('/:passportId/allergies', addAllergy);
+router.delete('/:passportId/allergies/:allergyId', deleteAllergy);
 
 module.exports = router;

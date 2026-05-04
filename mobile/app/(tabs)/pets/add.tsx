@@ -47,8 +47,8 @@ export default function AddPetScreen() {
         );
       }
     } catch (error) {
-      console.log('AI Prediction failed:', error);
       // Don't alert user, just let them fill manually
+      // Silently fail - AI prediction is optional
     } finally {
       setAnalyzing(false);
     }
@@ -61,6 +61,23 @@ export default function AddPetScreen() {
     if (!trimmedName) {
       Alert.alert('Validation Error', 'Pet Name is required');
       return;
+    }
+
+    // Validate weight
+    if (weight) {
+      const weightNum = parseFloat(weight);
+      if (isNaN(weightNum)) {
+        Alert.alert('Validation Error', 'Weight must be a valid number');
+        return;
+      }
+      if (weightNum <= 0) {
+        Alert.alert('Validation Error', 'Weight must be greater than 0');
+        return;
+      }
+      if (weightNum > 500) {
+        Alert.alert('Validation Error', 'Weight seems too high. Please check the value.');
+        return;
+      }
     }
 
     if (trimmedBirthday) {

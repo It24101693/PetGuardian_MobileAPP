@@ -13,15 +13,62 @@ export default function AdminUserForm() {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
+    username: '',
     password: '',
+    phoneNumber: '',
     role: 'owner' as 'owner' | 'veterinarian' | 'admin',
   });
   const router = useRouter();
 
   const handleSubmit = async () => {
     if (!formData.fullName || !formData.email || !formData.password) {
-      Alert.alert('Error', 'Please fill in all fields.');
+      Alert.alert('Error', 'Please fill in all required fields (Name, Email, Password).');
       return;
+    }
+
+    // Validate email format (must be valid email)
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(formData.email)) {
+      Alert.alert('Validation Error', 'Please enter a valid email address (e.g., user@example.com).');
+      return;
+    }
+
+    // Validate Gmail specifically if you want only Gmail
+    // Uncomment this if you want to restrict to Gmail only
+    // if (!formData.email.toLowerCase().endsWith('@gmail.com')) {
+    //   Alert.alert('Validation Error', 'Only Gmail addresses are allowed.');
+    //   return;
+    // }
+
+    // Validate phone number if provided
+    if (formData.phoneNumber) {
+      // Remove spaces, dashes, and parentheses for validation
+      const cleanPhone = formData.phoneNumber.replace(/[\s\-()]/g, '');
+      
+      // Check if it's a valid phone number (10-15 digits, optionally starting with +)
+      const phoneRegex = /^\+?[0-9]{10,15}$/;
+      if (!phoneRegex.test(cleanPhone)) {
+        Alert.alert('Validation Error', 'Please enter a valid phone number (10-15 digits, e.g., +1234567890 or 0771234567).');
+        return;
+      }
+    }
+
+    // Validate password length
+    if (formData.password.length < 6) {
+      Alert.alert('Validation Error', 'Password must be at least 6 characters.');
+      return;
+    }
+
+    // Validate username if provided
+    if (formData.username) {
+      if (formData.username.length < 3) {
+        Alert.alert('Validation Error', 'Username must be at least 3 characters.');
+        return;
+      }
+      if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+        Alert.alert('Validation Error', 'Username can only contain letters, numbers, and underscores.');
+        return;
+      }
     }
 
     setLoading(true);
@@ -76,6 +123,36 @@ export default function AdminUserForm() {
                 onChangeText={(val) => setFormData({ ...formData, email: val })}
               />
             </View>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Phone Number (Optional)</Text>
+            <View style={styles.inputWrapper}>
+              <Ionicons name="call-outline" size={20} color="#94a3b8" />
+              <TextInput
+                style={styles.input}
+                placeholder="+1234567890 or 0771234567"
+                keyboardType="phone-pad"
+                value={formData.phoneNumber}
+                onChangeText={(val) => setFormData({ ...formData, phoneNumber: val })}
+              />
+            </View>
+            <Text style={styles.helperText}>10-15 digits, can include + prefix</Text>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Username (Optional)</Text>
+            <View style={styles.inputWrapper}>
+              <Ionicons name="at-outline" size={20} color="#94a3b8" />
+              <TextInput
+                style={styles.input}
+                placeholder="Auto-generated from email if empty"
+                autoCapitalize="none"
+                value={formData.username}
+                onChangeText={(val) => setFormData({ ...formData, username: val })}
+              />
+            </View>
+            <Text style={styles.helperText}>Leave empty to use email prefix as username</Text>
           </View>
 
           <View style={styles.inputGroup}>
@@ -193,6 +270,12 @@ const styles = StyleSheet.create({
     height: 50,
     fontSize: 15,
     color: '#1e293b',
+  },
+  helperText: {
+    fontSize: 12,
+    color: '#94a3b8',
+    marginTop: 6,
+    marginLeft: 4,
   },
   roleContainer: {
     flexDirection: 'row',

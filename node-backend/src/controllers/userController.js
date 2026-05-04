@@ -85,16 +85,110 @@ const toggleUserStatus = async (req, res, next) => {
 };
 
 // @desc  Create user (admin)
+// @desc  Create user (admin)
 // @route POST /api/users
 const createUserByAdmin = async (req, res, next) => {
   try {
-    const { fullName, email, password, role } = req.body;
-    const userExists = await User.findOne({ email });
-    if (userExists) return res.status(400).json({ success: false, message: 'User already exists.' });
+    const { fullName, email, password, role, username, phoneNumber } = req.body;
+    
+    // Validation
+    if (!fullName || !email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Full name, email, and password are required' 
+      });
+    }
 
-    const user = await User.create({ fullName, email, password, role });
+    // Validate email format
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Please provide a valid email address' 
+      });
+    }
+
+    // Validate phone number if provided
+    if (phoneNumber) {
+      const cleanPhone = phoneNumber.replace(/[\s\-()]/g, '');
+      const phoneRegex = /^\+?[0-9]{10,15}$/;
+      if (!phoneRegex.test(cleanPhone)) {
+        return res.status(400).json({ 
+          success: false, 
+          message: 'Please provide a valid phone number (10-15 digits)' 
+        });
+      }
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Password must be at least 6 characters' 
+      });
+    }
+
+    // Generate username from email if not provided
+    const finalUsername = username || email.split('@')[0];
+
+    // Validate username
+    if (finalUsername.length < 3) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Username must be at least 3 characters' 
+      });
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(finalUsername)) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Username can only contain letters, numbers, and underscores' 
+      });
+    }
+
+    // Check if user exists
+    const userExists = await User.findOne({ $or: [{ email }, { username: finalUsername }] });
+    if (userExists) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'User with this email or username already exists' 
+      });
+    }
+
+    // Create user with passwordHash field
+    const userData = { 
+      fullName, 
+      email, 
+      username: finalUsername,
+      passwordHash: password, // Model expects passwordHash
+      role: role || 'owner'
+    };
+
+    // Add phone number if provided
+    if (phoneNumber) {
+      userData.phoneNumber = phoneNumber;
+    }
+
+    const user = await User.create(userData);
+    
+    console.log('✅ User created successfully:', user.email);
     res.status(201).json({ success: true, data: user });
   } catch (error) {
+    console.error('❌ Create user error:', error.message);
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(400).json({ 
+        success: false, 
+        message: `User with this ${field} already exists` 
+      });
+    }
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      return res.status(400).json({ 
+        success: false, 
+        message: errors.join(', ') 
+      });
+    }
     next(error);
   }
 };

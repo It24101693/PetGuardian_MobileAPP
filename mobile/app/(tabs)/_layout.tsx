@@ -3,7 +3,6 @@ import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/theme';
 import { useAuth } from '../../contexts/AuthContext';
-import { LooperAssistant } from '../../components/ui/LooperAssistant';
 
 export default function TabLayout() {
   const { user } = useAuth();

@@ -55,6 +55,23 @@ export default function EditPetScreen() {
       return;
     }
 
+    // Validate weight
+    if (weight) {
+      const weightNum = parseFloat(weight);
+      if (isNaN(weightNum)) {
+        Alert.alert('Validation Error', 'Weight must be a valid number');
+        return;
+      }
+      if (weightNum <= 0) {
+        Alert.alert('Validation Error', 'Weight must be greater than 0');
+        return;
+      }
+      if (weightNum > 500) {
+        Alert.alert('Validation Error', 'Weight seems too high. Please check the value.');
+        return;
+      }
+    }
+
     try {
       setSaving(true);
       await petService.updatePet(id as string, {

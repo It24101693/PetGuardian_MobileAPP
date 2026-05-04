@@ -121,7 +121,7 @@ export const scanService = {
         confidence: top.score,
       };
     } catch (err) {
-      console.log('HuggingFace API failed, falling back to local service:', err);
+      console.log('HuggingFace API failed, falling back to local service');
       // Fallback to local AI service if HF fails
       return this._predictBreedLocal(imageUri);
     }

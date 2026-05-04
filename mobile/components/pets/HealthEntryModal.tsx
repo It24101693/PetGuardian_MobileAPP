@@ -41,31 +41,33 @@ export function HealthEntryModal({ visible, onClose, type, passportId, initialDa
   const [reaction, setReaction] = useState('');
 
   useEffect(() => {
-    if (initialData) {
-      if (type === 'vaccine') {
-        setVaccineName(initialData.vaccineName || '');
-        setDateGiven(initialData.dateGiven ? initialData.dateGiven.split('T')[0] : '');
-        setNextDue(initialData.nextDueDate ? initialData.nextDueDate.split('T')[0] : '');
-        setVetName(initialData.veterinarianName || '');
-        setNotes(initialData.notes || '');
-      } else if (type === 'record') {
-        setTitle(initialData.title || '');
-        setDiagnosis(initialData.diagnosis || '');
-        setTreatment(initialData.treatment || '');
-        setMeds(initialData.medications || '');
-        setRecoveryStatus(initialData.recoveryStatus || 'Not Started');
-        setRecordType(initialData.type || 'checkup');
-        setVetName(initialData.veterinarianName || '');
-        setNotes(initialData.notes || '');
-      } else if (type === 'allergy') {
-        setAllergyName(initialData.name || '');
-        setSeverity(initialData.severity || 'Moderate');
-        setReaction(initialData.reaction || '');
+    if (visible) {
+      if (initialData) {
+        if (type === 'vaccine') {
+          setVaccineName(initialData.vaccineName || '');
+          setDateGiven(initialData.dateGiven ? initialData.dateGiven.split('T')[0] : '');
+          setNextDue(initialData.nextDueDate ? initialData.nextDueDate.split('T')[0] : '');
+          setVetName(initialData.veterinarianName || '');
+          setNotes(initialData.notes || '');
+        } else if (type === 'record') {
+          setTitle(initialData.title || '');
+          setDiagnosis(initialData.diagnosis || '');
+          setTreatment(initialData.treatment || '');
+          setMeds(initialData.medications || '');
+          setRecoveryStatus(initialData.recoveryStatus || 'Not Started');
+          setRecordType(initialData.type || 'checkup');
+          setVetName(initialData.veterinarianName || '');
+          setNotes(initialData.notes || '');
+        } else if (type === 'allergy') {
+          setAllergyName(initialData.name || '');
+          setSeverity(initialData.severity || 'Moderate');
+          setReaction(initialData.reaction || '');
+        }
+      } else {
+        resetForm();
       }
-    } else {
-      resetForm();
     }
-  }, [initialData, type, visible]);
+  }, [initialData, type]);
 
   const resetForm = () => {
     setNotes('');
@@ -99,7 +101,9 @@ export function HealthEntryModal({ visible, onClose, type, passportId, initialDa
         if (nextDueObj <= dateGivenObj) throw new Error('Next Due Date must be after Date Given');
       }
     } else if (type === 'record') {
-      if (!title.trim()) throw new Error('Record title is required');
+      const trimmedTitle = title.trim();
+      if (!trimmedTitle) throw new Error('Record title is required');
+      if (trimmedTitle.length < 3) throw new Error('Title must be at least 3 characters');
       if (!diagnosis.trim() && !treatment.trim()) throw new Error('Please provide either a Diagnosis or Treatment plan');
     } else if (type === 'allergy') {
       if (!allergyName.trim()) throw new Error('Allergy name is required');
@@ -137,19 +141,23 @@ export function HealthEntryModal({ visible, onClose, type, passportId, initialDa
           notes: notes.trim(), 
           recordDate: initialData?.recordDate || new Date().toISOString() 
         };
+        console.log('📤 Sending medical record:', payload);
         if (initialData?._id) {
           await healthService.updateMedicalRecord(initialData._id, payload);
         } else {
           await healthService.addMedicalRecord(passportId, payload);
         }
       } else if (type === 'allergy') {
-        await healthService.addAllergy(passportId, { 
+        const payload = { 
           name: allergyName.trim(), 
           severity, 
           reaction: reaction.trim() 
-        });
+        };
+        console.log('📤 Sending allergy:', payload);
+        await healthService.addAllergy(passportId, payload);
       }
       
+      resetForm();
       onSuccess();
       onClose();
     } catch (error: any) {
