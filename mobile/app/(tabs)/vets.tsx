@@ -1,18 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Linking, Platform, ActivityIndicator, Alert, ScrollView, Dimensions } from 'react-native';
 import * as Location from 'expo-location';
-let MapView: any, Marker: any, PROVIDER_GOOGLE: any;
-if (Platform.OS !== 'web') {
-  const Maps = require('react-native-maps');
-  MapView = Maps.default;
-  Marker = Maps.Marker;
-  PROVIDER_GOOGLE = Maps.PROVIDER_GOOGLE;
-} else {
-  // Fallback for web to prevent crash
-  MapView = (props: any) => <View {...props} style={[props.style, { backgroundColor: '#e2e8f0', justifyContent: 'center', alignItems: 'center' }]}><Text style={{ color: '#64748b' }}>Maps not available on web</Text></View>;
-  Marker = () => null;
-  PROVIDER_GOOGLE = 'google';
-}
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import { vetService, Vet } from '../../services/vetService';
 import { Colors, Spacing, FontSize, FontWeight, Radius, Shadow } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
@@ -31,21 +20,28 @@ export default function VetDiscoveryScreen() {
   const [activeCategory, setActiveCategory] = useState('All');
   const [showOpenOnly, setShowOpenOnly] = useState(false);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<any>(null);
 
   const categories = ['All', 'Hospital', 'Clinic', 'Doctor'];
 
   useEffect(() => {
     (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        loadAllVets();
-        return;
-      }
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+          loadAllVets();
+          return;
+        }
 
-      let currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-      loadNearbyVets(currentLocation.coords.latitude, currentLocation.coords.longitude);
+        let currentLocation = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        setLocation(currentLocation);
+        loadNearbyVets(currentLocation.coords.latitude, currentLocation.coords.longitude);
+      } catch (error) {
+        console.error("Location or Map initialization error:", error);
+        loadAllVets(); // Fallback to all vets if location fails
+      }
     })();
   }, []);
 

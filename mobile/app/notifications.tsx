@@ -105,7 +105,7 @@ export default function NotificationsScreen() {
         style={styles.deleteBtn}
         onPress={() => handleDelete(item._id)}
       >
-        <Ionicons name="trash-outline" size={18} color={Colors.error} />
+        <Ionicons name="trash-outline" size={18} color={Colors.danger} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Colors.divider,
-    ...Shadow.xs,
+    ...Shadow.sm,
   },
   unreadItem: {
     backgroundColor: Colors.white,

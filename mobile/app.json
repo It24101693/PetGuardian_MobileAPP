@@ -16,21 +16,51 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.petguardian.app"
+      "bundleIdentifier": "com.petguardian.app",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "PetGuardian needs your location to find nearby veterinary clinics.",
+        "NSCameraUsageDescription": "Allow PetGuardian to access your camera for pet scanning."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0f172a"
       },
-      "package": "com.petguardian.app"
+      "package": "com.petguardian.app",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "FOREGROUND_SERVICE",
+        "CAMERA"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "YOUR_GOOGLE_MAPS_API_KEY_HERE"
+        }
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow PetGuardian to use your location to find nearby vets."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow PetGuardian to access your camera for pet scanning."
+        }
+      ]
     ],
     "scheme": "petguardian",
     "extra": {

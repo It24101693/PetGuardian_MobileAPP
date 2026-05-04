@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     alignItems: 'center',
-    ...Shadow.xs,
+    ...Shadow.sm,
   },
   clinicInfo: {
     flex: 1,
