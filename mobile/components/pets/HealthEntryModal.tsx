@@ -124,11 +124,13 @@ export function HealthEntryModal({ visible, onClose, type, passportId, initialDa
           veterinarianName: vetName.trim(), 
           notes: notes.trim() 
         };
+        console.log('📤 Sending vaccination:', payload);
         if (initialData?._id) {
           await healthService.updateVaccination(initialData._id, payload);
         } else {
           await healthService.addVaccination(passportId, payload);
         }
+        Alert.alert('Success', 'Vaccination record saved successfully!');
       } else if (type === 'record') {
         const payload = { 
           title: title.trim(), 
@@ -147,6 +149,7 @@ export function HealthEntryModal({ visible, onClose, type, passportId, initialDa
         } else {
           await healthService.addMedicalRecord(passportId, payload);
         }
+        Alert.alert('Success', 'Medical record saved successfully!');
       } else if (type === 'allergy') {
         const payload = { 
           name: allergyName.trim(), 
@@ -155,13 +158,17 @@ export function HealthEntryModal({ visible, onClose, type, passportId, initialDa
         };
         console.log('📤 Sending allergy:', payload);
         await healthService.addAllergy(passportId, payload);
+        Alert.alert('Success', 'Allergy record saved successfully!');
       }
       
       resetForm();
       onSuccess();
       onClose();
     } catch (error: any) {
-      Alert.alert('Validation Error', error.message || 'Failed to save entry');
+      console.error('❌ Save error:', error);
+      console.error('❌ Error response:', error.response?.data);
+      const errorMessage = error.response?.data?.message || error.message || 'Failed to save entry';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
