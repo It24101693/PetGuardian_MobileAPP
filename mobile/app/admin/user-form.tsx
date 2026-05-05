@@ -25,7 +25,12 @@ export default function AdminUserForm() {
   const isEditMode = !!userId;
 
   // Load user data if editing
- 
+  useEffect(() => {
+    if (isEditMode) {
+      loadUserData();
+    }
+  }, [userId]);
+
   const loadUserData = async () => {
     try {
       setInitialLoading(true);
