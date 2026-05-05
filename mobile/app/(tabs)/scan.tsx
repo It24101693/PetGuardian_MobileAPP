@@ -76,38 +76,7 @@ export default function ScanScreen() {
     }
   };
 
-  const analyzeImage = async () => {
-    if (!image) return;
-    try {
-      setLoading(true);
-      const res = await scanService.analyzeImage(image);
-      setResult(res);
-      
-      // Auto-save to medical records if pet is selected
-      if (selectedPetId) {
-        try {
-          const { passport } = await healthService.getPassportByPetId(selectedPetId);
-          await healthService.addMedicalRecord(passport._id, {
-            title: `AI Disease Scan: ${res.diseaseName}`,
-            type: 'diagnosis',
-            diagnosis: res.diseaseName,
-            treatment: res.treatment,
-            notes: `AI Confidence: ${(res.probability * 100).toFixed(1)}%. ${res.urgencyMessage || ''}`,
-            recordDate: new Date().toISOString()
-          });
-          // Find selected pet name for alert
-          const petName = pets.find(p => p._id === selectedPetId)?.name || 'your pet';
-          Alert.alert('Success', `AI Analysis complete and saved to ${petName}'s medical records.`);
-        } catch (saveErr) {
-          console.log('Failed to save auto-record:', saveErr);
-        }
-      }
-    } catch (error: any) {
-      Alert.alert('Scan Failed', 'Please ensure the AI service is running.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const renderPetSelector = () => (
     <View style={styles.section}>
