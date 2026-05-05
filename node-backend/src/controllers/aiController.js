@@ -18,7 +18,9 @@ exports.sendChatMessage = async (req, res) => {
     });
 
     // Get user's pets for context
-    
+    const pets = await Pet.find({ ownerId: req.user.id });
+    console.log('🐾 Found pets:', pets.length);
+
     // Enhanced AI logic with context awareness
     const aiResponseContent = generateAIResponse(message, pets, req.user);
     console.log('🤖 AI Response:', aiResponseContent.substring(0, 50) + '...');
@@ -50,13 +52,7 @@ function generateAIResponse(message, pets, user) {
   console.log('🐾 Pet count:', petCount);
 
   // Greeting responses
-  if (msgLower.match(/^(hi|hello|hey|hii|hiii|hai)$/i)) {
-    console.log('✅ Matched: Greeting');
-    if (petCount === 0) {
-      return "Hi! 👋 I'm Looper, your AI pet assistant. I noticed you haven't added any pets yet. Would you like to add your first pet?";
-    }
-    return `Hi! 👋 I'm Looper, your AI assistant for ${petNames}. How can I help you today?`;
-  }
+  
 
   // Schedule/Appointment related
   if (msgLower.includes('schedule') || msgLower.includes('checkup') || msgLower.includes('appointment')) {
