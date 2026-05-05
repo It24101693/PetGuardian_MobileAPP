@@ -79,35 +79,7 @@ export default function CommunityScreen() {
     }
   };
 
-  const handlePost = async () => {
-    if (!newPostContent.trim() && !selectedImage) return;
-    try {
-      setLoading(true);
-      if (editingPostId) {
-        await communityService.updatePost(editingPostId, { 
-          content: newPostContent,
-          feeling: selectedFeeling || undefined 
-        });
-        Alert.alert('Success', 'Post updated!');
-      } else {
-        await communityService.createPost({ 
-          content: newPostContent || "Shared a photo", 
-          image: selectedImage || undefined,
-          feeling: selectedFeeling || undefined
-        });
-      }
-      setNewPostContent('');
-      setSelectedImage(null);
-      setSelectedFeeling(null);
-      setEditingPostId(null);
-      loadPosts();
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', editingPostId ? 'Failed to update post.' : 'Failed to share your post.');
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleEdit = (post: Post) => {
     setEditingPostId(post._id);
@@ -374,6 +346,8 @@ export default function CommunityScreen() {
     </SafeAreaView>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
