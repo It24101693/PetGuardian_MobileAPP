@@ -36,7 +36,9 @@ export const adminService = {
     return data.data;
   },
 
- 
+  async deleteUser(id: string): Promise<void> {
+    await api.delete(`/users/${id}`);
+  },
 
   async toggleUserStatus(id: string): Promise<any> {
     const { data } = await api.put(`/users/${id}/toggle-status`);
