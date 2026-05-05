@@ -58,11 +58,6 @@ export default function AdminUserForm() {
       return;
     }
 
-    // Password is required only for create mode
-    if (!isEditMode && !formData.password) {
-      Alert.alert('Error', 'Password is required when creating a new user.');
-      return;
-    }
 
     // Validate email format (must be valid email)
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
