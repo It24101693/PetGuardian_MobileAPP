@@ -16,11 +16,7 @@ export const adminService = {
     return data.data;
   },
 
-  async getAllUsers(): Promise<any[]> {
-    const { data } = await api.get('/users');
-    return data.data;
-  },
-
+ 
   async createUser(userData: any): Promise<any> {
     const { data } = await api.post('/users', userData);
     return data.data;
