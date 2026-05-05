@@ -36,7 +36,27 @@ export default function AdminUserList() {
     loadUsers();
   }, []);
 
-
+  const handleDelete = (id: string, name: string) => {
+    Alert.alert(
+      'Delete User',
+      `Are you sure you want to permanently delete ${name}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive', 
+          onPress: async () => {
+            try {
+              await adminService.deleteUser(id);
+              loadUsers();
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete user.');
+            }
+          }
+        }
+      ]
+    );
+  };
 
   const handleToggleStatus = async (id: string) => {
     try {
