@@ -48,7 +48,14 @@ export default function CommunityScreen() {
     setRefreshing(false);
   };
 
-
+  const handleLike = async (id: string) => {
+    try {
+      await communityService.toggleLike(id);
+      loadPosts();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const feelings = [
     { label: 'Happy', emoji: '😊', icon: 'happy-outline' },
