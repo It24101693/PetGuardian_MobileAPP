@@ -258,24 +258,7 @@ export default function CommunityScreen() {
       
       {renderCreatePost()}
 
-      <View style={styles.recentActivityHeader}>
-        <Text style={styles.recentTitle}>RECENT ACTIVITY</Text>
-        <View style={styles.filterRow}>
-          <TouchableOpacity 
-            style={[styles.filterBtn, activeFilter === 'latest' && styles.filterBtnActive]}
-            onPress={() => setActiveFilter('latest')}
-          >
-            <Text style={[styles.filterText, activeFilter === 'latest' && styles.filterTextActive]}>Latest</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.filterBtn, activeFilter === 'popular' && styles.filterBtnActive]}
-            onPress={() => setActiveFilter('popular')}
-          >
-            <Text style={[styles.filterText, activeFilter === 'popular' && styles.filterTextActive]}>Popular</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
+
   );
 
   const renderPostItem = ({ item }: { item: Post }) => {
