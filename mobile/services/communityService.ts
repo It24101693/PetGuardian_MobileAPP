@@ -59,9 +59,6 @@ export const communityService = {
     return data.data;
   },
 
-  async deletePost(id: string): Promise<void> {
-    await api.delete(`/community/${id}`);
-  },
 
   async toggleLike(id: string): Promise<void> {
     await api.post(`/community/${id}/like`);
