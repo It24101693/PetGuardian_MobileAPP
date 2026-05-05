@@ -14,13 +14,7 @@ export function ClinicCard({ clinic, onPress }: ClinicCardProps) {
   const defaultImage = 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&q=80&w=800';
 
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.9} style={styles.container}>
-      <Card style={styles.card} padding={0}>
-        <Image 
-          source={{ uri: clinic.profileImageUrl || defaultImage }} 
-          style={styles.image} 
-          resizeMode="cover"
-        />
+    
         <View style={styles.content}>
           <View style={styles.header}>
             <Text style={styles.name} numberOfLines={1}>{clinic.clinicName || clinic.name}</Text>
