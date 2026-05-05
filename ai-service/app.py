@@ -24,12 +24,7 @@ app.register_blueprint(enhanced_prediction_bp)
 def index():
     return "PetGuardian AI Service - Disease Detection & Breed Classification"
 
-@app.route('/health')
-def health():
-    return {
-        'status': 'healthy',
-        'services': ['disease-detection', 'breed-classification']
-    }
+
 
 if __name__ == "__main__":
     # Pre-load models on startup
