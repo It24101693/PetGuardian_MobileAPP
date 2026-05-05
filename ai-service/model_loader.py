@@ -49,11 +49,7 @@ def _fix_layer_config(layer_config):
         layer_config['config'] = cfg
 
     # Fix Dense layer quantization_config error
-    if layer_config.get('class_name') == 'Dense':
-        cfg = layer_config.get('config', {})
-        cfg.pop('quantization_config', None)
-        layer_config['config'] = cfg
-
+   
     # Recurse into nested layer configs
     for key, value in layer_config.items():
         if isinstance(value, dict):
