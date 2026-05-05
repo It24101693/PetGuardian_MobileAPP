@@ -116,6 +116,27 @@ export default function CommunityScreen() {
     setSelectedImage(null); 
   };
 
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      'Delete Post',
+      'Are you sure you want to remove this post?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Delete', 
+          style: 'destructive', 
+          onPress: async () => {
+            try {
+              await communityService.deletePost(id);
+              loadPosts();
+            } catch (error) {
+              Alert.alert('Error', 'Failed to delete post.');
+            }
+          } 
+        },
+      ]
+    );
+  };
 
   const handlePostOptions = (post: Post) => {
     Alert.alert(
