@@ -18,9 +18,7 @@ exports.sendChatMessage = async (req, res) => {
     });
 
     // Get user's pets for context
-    const pets = await Pet.find({ ownerId: req.user.id });
-    console.log('🐾 Found pets:', pets.length);
-
+    
     // Enhanced AI logic with context awareness
     const aiResponseContent = generateAIResponse(message, pets, req.user);
     console.log('🤖 AI Response:', aiResponseContent.substring(0, 50) + '...');
