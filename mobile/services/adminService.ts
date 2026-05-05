@@ -26,6 +26,16 @@ export const adminService = {
     return data.data;
   },
 
+  async updateUser(id: string, userData: any): Promise<any> {
+    const { data } = await api.put(`/users/${id}`, userData);
+    return data.data;
+  },
+
+  async getUserById(id: string): Promise<any> {
+    const { data } = await api.get(`/users/${id}`);
+    return data.data;
+  },
+
   async deleteUser(id: string): Promise<void> {
     await api.delete(`/users/${id}`);
   },

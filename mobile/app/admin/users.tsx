@@ -117,6 +117,12 @@ export default function AdminUserList() {
         </View>
         <View style={styles.actions}>
           <TouchableOpacity 
+            onPress={() => router.push(`/admin/user-form?id=${item._id}`)} 
+            style={styles.actionBtn}
+          >
+            <Ionicons name="create-outline" size={22} color="#3b82f6" />
+          </TouchableOpacity>
+          <TouchableOpacity 
             onPress={() => { setSelectedUser(item); setShowNotifyModal(true); }} 
             style={styles.actionBtn}
           >

@@ -33,7 +33,20 @@ export default function AddPetScreen() {
     // Trigger AI Breed/Species prediction
     try {
       setAnalyzing(true);
+      console.log('🔍 Starting breed prediction for:', uri);
       const result = await scanService.predictBreed(uri);
+      console.log('✅ Breed prediction result:', result);
+      
+      // Check if we got a valid prediction
+      if (result.breed === 'Unknown' || result.confidence === 0) {
+        console.log('⚠️ Breed prediction unavailable');
+        Alert.alert(
+          'AI Prediction Unavailable', 
+          'Breed detection service is currently unavailable. Please enter breed manually.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
       
       if (result.confidence > 0.4) {
         setSpecies(result.species.charAt(0).toUpperCase() + result.species.slice(1));
@@ -45,10 +58,23 @@ export default function AddPetScreen() {
           `We think your pet is a ${result.breed} (${result.species})!`,
           [{ text: 'Great!' }]
         );
+      } else {
+        console.log('⚠️ Low confidence:', result.confidence);
+        Alert.alert(
+          'AI Prediction', 
+          `Breed detection confidence is low (${(result.confidence * 100).toFixed(1)}%). Please select manually.`,
+          [{ text: 'OK' }]
+        );
       }
-    } catch (error) {
-      // Don't alert user, just let them fill manually
-      // Silently fail - AI prediction is optional
+    } catch (error: any) {
+      console.error('❌ Breed prediction error:', error);
+      
+      // Don't show technical error details to user
+      Alert.alert(
+        'AI Prediction Unavailable', 
+        'Breed detection service is currently unavailable. Please enter breed manually.',
+        [{ text: 'OK' }]
+      );
     } finally {
       setAnalyzing(false);
     }

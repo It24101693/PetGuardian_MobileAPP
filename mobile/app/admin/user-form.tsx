@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { adminService } from '../../services/adminService';
 import { Button } from '../../components/ui/Button';
 import { Colors, Spacing, FontSize, Radius, Shadow } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 
 export default function AdminUserForm() {
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -19,10 +20,47 @@ export default function AdminUserForm() {
     role: 'owner' as 'owner' | 'veterinarian' | 'admin',
   });
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const userId = params.id as string | undefined;
+  const isEditMode = !!userId;
+
+  // Load user data if editing
+  useEffect(() => {
+    if (isEditMode) {
+      loadUserData();
+    }
+  }, [userId]);
+
+  const loadUserData = async () => {
+    try {
+      setInitialLoading(true);
+      const user = await adminService.getUserById(userId!);
+      setFormData({
+        fullName: user.fullName || '',
+        email: user.email || '',
+        username: user.username || '',
+        password: '', // Don't populate password for security
+        phoneNumber: user.phoneNumber || '',
+        role: user.role || 'owner',
+      });
+    } catch (error: any) {
+      Alert.alert('Error', 'Failed to load user data.');
+      router.back();
+    } finally {
+      setInitialLoading(false);
+    }
+  };
 
   const handleSubmit = async () => {
-    if (!formData.fullName || !formData.email || !formData.password) {
-      Alert.alert('Error', 'Please fill in all required fields (Name, Email, Password).');
+    // For edit mode, password is optional
+    if (!formData.fullName || !formData.email) {
+      Alert.alert('Error', 'Please fill in all required fields (Name, Email).');
+      return;
+    }
+
+    // Password is required only for create mode
+    if (!isEditMode && !formData.password) {
+      Alert.alert('Error', 'Password is required when creating a new user.');
       return;
     }
 
@@ -53,8 +91,8 @@ export default function AdminUserForm() {
       }
     }
 
-    // Validate password length
-    if (formData.password.length < 6) {
+    // Validate password length (only if password is provided)
+    if (formData.password && formData.password.length < 6) {
       Alert.alert('Validation Error', 'Password must be at least 6 characters.');
       return;
     }
@@ -73,16 +111,38 @@ export default function AdminUserForm() {
 
     setLoading(true);
     try {
-      await adminService.createUser(formData);
-      Alert.alert('Success', 'User created successfully!', [
-        { text: 'OK', onPress: () => router.back() }
-      ]);
+      // Prepare data - don't send empty password in edit mode
+      const submitData: any = { ...formData };
+      if (isEditMode && !submitData.password) {
+        delete submitData.password;
+      }
+
+      if (isEditMode) {
+        await adminService.updateUser(userId!, submitData);
+        Alert.alert('Success', 'User updated successfully!', [
+          { text: 'OK', onPress: () => router.back() }
+        ]);
+      } else {
+        await adminService.createUser(submitData);
+        Alert.alert('Success', 'User created successfully!', [
+          { text: 'OK', onPress: () => router.back() }
+        ]);
+      }
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to create user.');
+      Alert.alert('Error', error.message || `Failed to ${isEditMode ? 'update' : 'create'} user.`);
     } finally {
       setLoading(false);
     }
   };
+
+  if (initialLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar style="dark" />
+        <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 100 }} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -91,7 +151,7 @@ export default function AdminUserForm() {
         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Ionicons name="arrow-back" size={24} color="#1e293b" />
         </TouchableOpacity>
-        <Text style={styles.title}>Register New User</Text>
+        <Text style={styles.title}>{isEditMode ? 'Edit User' : 'Register New User'}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -121,8 +181,12 @@ export default function AdminUserForm() {
                 autoCapitalize="none"
                 value={formData.email}
                 onChangeText={(val) => setFormData({ ...formData, email: val })}
+                editable={!isEditMode}
               />
             </View>
+            {isEditMode && (
+              <Text style={styles.helperText}>Email cannot be changed</Text>
+            )}
           </View>
 
           <View style={styles.inputGroup}>
@@ -156,17 +220,20 @@ export default function AdminUserForm() {
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Initial Password</Text>
+            <Text style={styles.label}>{isEditMode ? 'New Password (Optional)' : 'Initial Password'}</Text>
             <View style={styles.inputWrapper}>
               <Ionicons name="lock-closed-outline" size={20} color="#94a3b8" />
               <TextInput
                 style={styles.input}
-                placeholder="Min. 6 characters"
+                placeholder={isEditMode ? "Leave empty to keep current password" : "Min. 6 characters"}
                 secureTextEntry
                 value={formData.password}
                 onChangeText={(val) => setFormData({ ...formData, password: val })}
               />
             </View>
+            {isEditMode && (
+              <Text style={styles.helperText}>Leave empty to keep current password</Text>
+            )}
           </View>
 
           <View style={styles.inputGroup}>
@@ -193,7 +260,7 @@ export default function AdminUserForm() {
           </View>
 
           <Button
-            title="Create User Account"
+            title={isEditMode ? "Update User" : "Create User Account"}
             onPress={handleSubmit}
             loading={loading}
             style={styles.submitBtn}
@@ -203,7 +270,9 @@ export default function AdminUserForm() {
         <View style={styles.infoBox}>
           <Ionicons name="information-circle" size={20} color="#3b82f6" />
           <Text style={styles.infoText}>
-            The new user will be able to log in immediately with the credentials you provide here.
+            {isEditMode 
+              ? 'Update user information. Leave password empty to keep the current password.'
+              : 'The new user will be able to log in immediately with the credentials you provide here.'}
           </Text>
         </View>
       </ScrollView>
